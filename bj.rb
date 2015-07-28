@@ -5,8 +5,18 @@ QUEEN= "Queen"
 KING= "King"
 ACE= "Ace"
 
+ACE_VALUE = 11
+ACE_VALUE_ALT = 1
+FACE_CARD_VALUE = 10
+DEALER_LIMIT = 17
+BLACKJACK = 21
+
 SUITS = ["Hearts", "Diamonds", "Spades", "Clubs"]
 CARDS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', JACK, QUEEN, KING, ACE]
+
+CARD_SUIT = 0
+CARD_VALUE = 1
+
 
 # Calculate the total of the dealt cards
 def calculate_total(cards) 
@@ -14,14 +24,14 @@ def calculate_total(cards)
   # first create an array of just the values, not the suits
 
   #the map method creates a new array based on the block
-  card_values = cards.map{|a_card| a_card[1] }
+  card_values = cards.map{|a_card| a_card[CARD_VALUE] }
 
   total = 0
   card_values.each do |value|
     if value == ACE
-      total += 11           # an ace can be valued at 1 or 11, use 11 first
+      total += ACE_VALUE    # an ace can be valued at 1 or 11, use 11 first
     elsif value.to_i == 0   # J, Q, K - to_{} will return 0 if non-numeric input
-      total += 10           # for those cases the card value is 10
+      total += FACE_CARD_VALUE  # for those cases the card value is 10
     else
       total += value.to_i   
     end
@@ -29,7 +39,7 @@ def calculate_total(cards)
 
   #correct for Aces, if we have blown over 21
   card_values.select{|value| value == ACE}.count.times do
-    total -= 10 if total > 21
+    total -= (ACE_VALUE - ACE_VALUE_ALT) if total > BLACKJACK
   end
 
   total
@@ -38,15 +48,13 @@ end
 
 #Create string for the card, to print
 def print_card (card)
-  card[1] + " of "  + card[0] 
+  card[CARD_VALUE] + " of "  + card[CARD_SUIT] 
 end
 
-#Prints the cards of the initial deal
 def print_initial_total(who_has, cards, total)
   puts who_has + " has: " + print_card(cards[0]) + " and " + print_card(cards[1]) + ", for a total of #{total}"
 end
 
-#Prints all the dealt cards
 def print_dealt_cards(cards)
   cards.each do |a_card|
     puts "=> " + print_card(a_card)
@@ -56,7 +64,7 @@ end
 # get a choice from the player
 def get_choice(message, choice_1, choice_2)
   puts message
-  input= choice_1
+  input = choice_1
   loop do
     input = gets.chomp
   
@@ -99,11 +107,15 @@ def blackjack
   # Show Cards
   
   # puts "Dealer has: #{dealercards[0]} and #{dealercards[1]}, for a total of #{dealertotal}"
-  print_initial_total("Dealer", dealercards, dealertotal)
-  print_initial_total("Player", mycards, mytotal)
+  #print_initial_total("Dealer", dealercards, dealertotal)
+  dealer_first_card = []
+  dealer_first_card << dealercards[0]
+  puts "Dealer shows one card: #{print_card(dealercards[0])}, for a total of #{calculate_total(dealer_first_card)}"
+  puts "Player has: #{print_card(mycards[0])} and #{print_card(mycards[1])} , for a total of #{mytotal}"
+
   puts ""
     
-  while mytotal < 21
+  while mytotal < BLACKJACK
   
     if get_choice("What would you like to do? 1) hit 2) stay", '1', '2') == '2'
       puts "Stay!"
@@ -113,16 +125,16 @@ def blackjack
     # hit me!
     puts "Hit me!"
     new_card= deck.pop
-    puts "Dealing card to player: " + print_card(new_card)
+    puts "Dealing card to player: #{print_card(new_card)}"
     mycards << new_card
   
-    mytotal= calculate_total(mycards)
+    mytotal = calculate_total(mycards)
     puts "Your total is now #{mytotal}"
     
-    if mytotal == 21
+    if mytotal == BLACKJACK
       puts "Congratulations, you hit 21! You win!"
       return
-    elsif mytotal > 21
+    elsif mytotal > BLACKJACK
       puts "Sorry, it looks like you busted!"
       return
     end
@@ -130,24 +142,24 @@ def blackjack
   
   # Dealer turn
   
-  if dealertotal == 21
+  if dealertotal == BLACKJACK
     puts "Dealer wins- blackjack!"
     return
   end
     
-  while dealertotal < 17
+  while dealertotal < DEALER_LIMIT
     # dealer hit
     new_card= deck.pop
-    puts "Dealing new card for dealer: " + print_card(new_card)
+    puts "Dealing new card for dealer: #{print_card(new_card)}"
     dealercards << new_card
     
     dealertotal = calculate_total(dealercards)  
     puts "Dealer total is now: #{dealertotal}"
     
-    if dealertotal == 21
+    if dealertotal == BLACKJACK
       puts "Dealer has 21- dealer wins!"
       return
-    elsif dealertotal > 21
+    elsif dealertotal > BLACKJACK
       puts "Dealer busted- player wins!"  
       return
     end
