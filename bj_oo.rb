@@ -8,8 +8,8 @@ class Participant
   attr_reader :name
 
   def set_name(name)
-    @name= name
-    @hand= Hand.new
+    @name = name
+    @hand = Hand.new
   end
   
   def << (card)
@@ -37,10 +37,10 @@ class Dealer < Participant
   
   def initialize
     set_name("Dealer")
-    @deck= Deck.new
+    @deck = Deck.new
     @deck.shuffle
-    @show_all=false
-    @talk=false
+    @show_all = false
+    @talk = false
   end
   
   def deal_to(participant)
@@ -189,12 +189,11 @@ class Game
     show_dealer
   end
   
-  #Each player gets two cards
   def initial_deal
-    dealer.deal_to(player)
-    dealer.deal_to(dealer)
-    dealer.deal_to(player)
-    dealer.deal_to(dealer)
+    2.times do
+      dealer.deal_to(player)
+      dealer.deal_to(dealer)
+    end
     show_all_hands
     dealer.show_all = true
     dealer.talk = true
@@ -202,9 +201,7 @@ class Game
 
   def players_turn  
     while player.hand_value < BLACKJACK
-      if player.decide == '2'
-        break
-      end
+      break if player.decide == '2'
       # hit me!
       dealer.deal_to(player)
       player_total = player.hand_value
@@ -213,10 +210,7 @@ class Game
   end
 
   def dealers_turn
-    # Dealer turn
-    if dealer.hand_value >= DEALER_LIMIT
-      return
-    end
+     return if dealer.hand_value >= DEALER_LIMIT
 
     show_dealer
     while dealer.hand_value < DEALER_LIMIT && !(dealer.hand_value >= BLACKJACK)
@@ -252,12 +246,7 @@ class Game
   def play_again?
     puts ""
     puts "Play again? 1) yes 2) no"
-    if gets.chomp == '1'
-      true
-    else
-      puts "Goodbye!"
-      exit
-    end
+    gets.chomp == '1'  
   end
 
   def play
@@ -271,12 +260,13 @@ class Game
           check_winner
         end
       end
-      play_again?
+      break unless play_again?
       puts ""
       puts "New game..."
       @dealer = Dealer.new
       @player = Player.new
     end
+    puts "Goodbye!"
   end
 end
 
